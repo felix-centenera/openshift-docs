@@ -1,0 +1,113 @@
+#Registros FQDN
+
+master01.itshellws.local 10.7.24.254
+nodo01.itshellws.local 10.7.24.253
+nodo02.itshellws.local 10.7.24.252
+
+# Generar Redes en caso de ser necesario o utilizar /etc/hosts con todos los servidores del stack
+
+Terraform para deploy de infraestructura (VM y Redes)
+
+vi openshift.tf
+
+# Configuramos nuestras credenciales y las redes , nombre de las virtuales a generar usando el template de Centos 7
+
+# SET YOUR VCENTER CONNECTION INFORMATION HERE
+provider "vsphere" {
+  user           = "Administrator@vsphere.local"
+  password       = "PEPITOO"
+  vsphere_server = "vcenter.itshell.org"
+  allow_unverified_ssl = "true"
+}
+
+# DEFINE YOUR RESOURCES HERE FOLLOWING THIS TEMPLATE, REPLACING VALUES AS REQUIRED
+resource "vsphere_virtual_machine" "master01" {
+  name   = "master01"
+  datacenter = "itshell.org"
+  vcpu   = 2
+  memory = 4096
+  domain = "itshellws.local"
+  dns_suffixes = ["itshellws.local"]
+  dns_servers = ["10.80.200.2"]
+
+  network_interface {
+    label = "dv-LAN"
+    ipv4_address = "10.7.24.254"
+    ipv4_prefix_length = "24"
+    ipv4_gateway = "10.7.24.1"
+  }
+
+  disk {
+    template = "Discovered virtual machine/Centos 7"
+    datastore = "Data1-r900"
+    type = "thin"
+  }
+}
+
+resource "vsphere_virtual_machine" "nodo01" {
+  name   = "nodo01"
+  datacenter = "itshell.org"
+  vcpu   = 2
+  memory = 2048
+  domain = "itshellws.local"
+  dns_suffixes = ["itshellws.local"]
+  dns_servers = ["10.80.200.2"]
+
+  network_interface {
+
+
+  name   = "nodo01"
+  datacenter = "itshell.org"
+  vcpu   = 2
+  memory = 2048
+  domain = "itshellws.local"
+  dns_suffixes = ["itshellws.local"]
+  dns_servers = ["10.80.200.2"]
+
+  network_interface {
+    label = "dv-LAN"
+    ipv4_address = "10.7.24.253"
+    ipv4_prefix_length = "24"
+    ipv4_gateway = "10.7.24.1"
+  }
+
+  disk {
+    template = "Discovered virtual machine/Centos 7"
+    datastore = "Data2-r900"
+    type = "thin"
+  }
+}
+
+resource "vsphere_virtual_machine" "nodo02" {
+  name   = "nodo02"
+  datacenter = "itshell.org"
+  vcpu   = 2
+  memory = 2048
+  domain = "itshellws.local"
+  dns_suffixes = ["itshellws.local"]
+  dns_servers = ["10.80.200.2"]
+
+  network_interface {
+    label = "dv-LAN"
+    ipv4_address = "10.7.24.252"
+    ipv4_prefix_length = "24"
+    ipv4_gateway = "10.7.24.1"
+  }
+
+  disk {
+    template = "Discovered virtual machine/Centos 7"
+    datastore = "Data2-r900"
+    type = "thin"
+  }
+}
+
+----
+
+terraform plan
+
+terraform apply
+
+----
+
+el archivo terraform.tfstate guarda el status de la infraestructura creada
+

@@ -1,0 +1,60 @@
+Clonar Repo ansible
+
+git clone https://github.com/openshift/openshift-ansible.git
+
+# Revisar pagina de requerimientos y tipos de arquitecturas.
+install ansible
+
+https://docs.openshift.com/enterprise/3.0/architecture/infrastructure_components/kubernetes_infrastructure.html#high-availability-masters
+
+https://docs.openshift.com/enterprise/3.0/install_config/install/advanced_install.html
+
+key-value store
+
+https://coreos.com/blog/performance-of-etcd.html
+
+LINK DE Seguridad SCC
+
+https://blog.openshift.com/understanding-service-accounts-sccs/
+
+## Generar archivo
+
+vi openshift_inventory
+----
+
+[OSEv3:children]
+masters
+nodes
+etcd
+
+[OSEv3:vars]
+# SSH user, this user should allow ssh based auth without requiring a password
+ansible_ssh_user=root
+openshift_use_etcd_system_container=True
+debug_level=2
+deployment_type=origin
+openshift_master_default_subdomain=apps.itshellws.local
+osm_default_node_selector='region=us-central'
+openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider', 'filename': '/etc/origin/htpasswd'}]
+
+# host group for etcd, should run on a node that is not schedulable
+[etcd]
+master01.itshellws.local
+nodo01.itshellws.local
+nodo02.itshellws.local
+
+[masters]
+master01.itshellws.local
+
+[nodes]
+master01.itshellws.local openshift_node_labels="{'region': 'infra', 'zone': 'mpls'}" openshift_schedulable=true
+nodo01.itshellws.local openshift_node_labels="{'region': 'us-central', 'zone': 'mpls'}" openshift_schedulable=true
+nodo02.itshellws.local openshift_node_labels="{'region': 'us-central', 'zone': 'mpls'}" openshift_schedulable=true
+
+-----
+
+# Ansible v1
+
+sudo ansible-playbook -i openshift_inventory playbooks/byo/config.yml
+
+

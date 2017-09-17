@@ -1,0 +1,11 @@
+- kubectl config set-cluster master01-itshellws-local:8443 --server=https://master01.itshellws.local:8443 --insecure-skip-tls-verify=true
+        - kubectl config set-credentials admin/master01-itshellws-local:8443 --token=8X51jY773uz2VggaiZchzvQP3Jcg01h4DUw1UyoLYJE
+        - kubectl config set-context nginx/master01-itshellws-local:8443/admin --cluster=master01-itshellws-local:8443 --namespace=nginx --user=admin/master01-itshellws-local:8443 
+        - kubectl config use-context nginx/master01-itshellws-local:8443/admin
+        - kubectl delete secret myregistrykey
+        - kubectl create secret docker-registry myregistrykey --docker-server=git.itshellws.org:4567 --docker-username=root --docker-password=vikingo1234! --docker-email=e_ariel@hotmail.es
+        - kubectl get cs
+        - sed -i "s/<VERSION>/$(echo $CI_BUILD_REF | cut -c 1-7)/" template/deployment.yml       
+        - kubectl apply -f template/deployment.yml
+        - kubectl apply -f template/svc.yml
+

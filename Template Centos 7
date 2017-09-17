@@ -1,0 +1,44 @@
+#Generar Registros de DNS de VM's a utilizar.
+
+Template Centos 7
+
+Instalar como LVM y luego agregar otro volumen de 8gb para docker-storage
+
+hostname localhost.localdomain
+
+# Copiar las key de ssh de nuestro equipo para que queden en el template
+
+ssh-keygen ssh-copy-id root@1.1.1.1(ip del equipo)
+
+yum install docker -y
+
+cat <<EOF > /etc/sysconfig/docker-storage-setup
+DEVS=/dev/sdb
+VG=docker-vg
+EOF
+
+docker-storage-setup
+
+sed "s/OPTIONS=.*/OPTIONS='--selinux-enabled --insecure-registry 172.30.0.0\/16'/g"  -i /etc/sysconfig/docker
+
+systemctl enable docker
+systemctl start docker
+sudo yum install -y open-vm-tools perl net-tools
+sed -i '/^\(HWADDR\|UUID\)=/d' /etc/sysconfig/network-scripts/ifcfg-e*
+sed -i -e 's@^ONBOOT="no@ONBOOT="yes@' /etc/sysconfig/network-scripts/ifcfg-e*
+init 0
+
+sudo yum install -y open-vm-tools perl net-tools
+yum remove open-vm-tools-10.0.5-4.el7_3.x86_64
+yum install open-vm-tools
+
+systemctl start vmtoolsd.service
+systemctl enable vmtoolsd.service
+
+mkdir -p /var/lib/etcd/etcd.etcd/
+
+chmod 777 -R /var/lib/etcd/etcd.etcd/
+
+init 0
+
+

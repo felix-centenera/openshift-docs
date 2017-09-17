@@ -1,0 +1,53 @@
+## oc edit scc anyuid
+
+allowHostDirVolumePlugin: true
+allowHostIPC: false
+allowHostNetwork: false
+allowHostPID: false
+allowHostPorts: false
+allowPrivilegedContainer: true
+apiVersion: v1
+defaultAddCapabilities: []
+fsGroup:
+  type: RunAsAny
+groups:
+- system:cluster-admins
+kind: SecurityContextConstraints
+metadata:
+  annotations:
+    kubernetes.io/description: anyuid provides all features of the restricted SCC
+      but allows users to run with any UID and any GID.
+  creationTimestamp: 2017-09-03T20:34:48Z
+  name: anyuid
+  resourceVersion: "225402"
+  selfLink: /api/v1/securitycontextconstraints/anyuid
+  uid: 5444cbb5-90e7-11e7-af3c-005056a857db
+priority: 10
+readOnlyRootFilesystem: false
+requiredDropCapabilities:
+- MKNOD
+- SYS_CHROOT
+runAsUser:
+  type: RunAsAny
+seLinuxContext:
+  type: MustRunAs
+supplementalGroups:
+  type: RunAsAny
+users:
+- system:serviceaccount:default:default
+- system:serviceaccount:demo1:default
+- system:serviceaccount:alpine-prd:admin
+- system:serviceaccount:alpine-prd:default
+- system:serviceaccount:nginx:admin
+- system:serviceaccount:nginx:default
+- system:serviceaccount:hello-world:admin
+- system:serviceaccount:hello-world:default
+volumes:
+- configMap
+- downwardAPI
+- emptyDir
+- hostPath
+- persistentVolumeClaim
+- projected
+- secret
+

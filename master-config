@@ -1,0 +1,53 @@
+# vi /etc/sysconfig/docker
+
+INSECURE_REGISTRY='--insecure-registry 172.30.221.102:5000'
+
+systemctl restart docker
+
+# Instalando NFS
+yum groupinstall -y file-server
+systemctl enable rpcbind
+systemctl enable nfs-server
+systemctl start rpcbind
+systemctl start nfs-server
+
+# Firewall
+
+rpcinfo -p
+
+vi /etc/sysconfig/iptables
+
+-A INPUT -p udp -m state --state NEW -m multiport --dports 111,892,2049,32769,58271,20048,50800,33392,48954,38827,34499 -j ACCEPT
+-A INPUT -p tcp -m state --state NEW -m multiport --dports 111,892,2049,32769,58271,20048,50800,33392,48954,38827,34499 -j ACCEPT
+-A INPUT -p udp -m state --state NEW -m multiport --dports 111,892,2049,32769 -j ACCEPT
+-A INPUT -p tcp -m state --state NEW -m multiport --dports 111,892,2048,2049,32803,10252,10251,2379,2380  -j ACCEPT
+
+systemctl restart iptables
+
+iptables -L 
+
+# Generar archivo para storage persistente
+
+PV.yaml
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+    name: pv0001
+spec:
+    capacity:
+      storage: 8Gi
+    accessModes:
+      - ReadWriteOnce
+    persistentVolumeReclaimPolicy: Retain
+    hostPath:
+     path: /mnt/RBD/pv0001
+
+for i in `seq -w 0001 0020`; do SHARE=/mnt/RBD/pv$i; mkdir -p $SHARE; chmod 777 $SHARE; chown nfsnobody:nfsnobody $SHARE; echo "$SHARE 10.7.24.0/24(rw,all_squash)" >>/etc/exports; sed s/pv0001/pv$i/g /root/PV.yaml | oc create -f -; done
+
+ls -lZ /mnt/RBD/ -d
+id nfsnobody
+chown nfsnobody:nfsnobody -R /mnt/RBD/
+chmod +xr /mnt/RBD/
+exportfs -a
+exportfs

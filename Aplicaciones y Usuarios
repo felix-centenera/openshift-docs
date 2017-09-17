@@ -1,0 +1,61 @@
+Aplicaciones y Usuarios
+
+# Usuarios
+
+htpasswd /etc/origin/htpasswd admin
+htpasswd /etc/origin/htpasswd zz
+
+
+# Politicas SCC
+
+oc edit scc anyuid
+oadm policy add-scc-to-user anyuid -z default
+oc policy add-role-to-user admin admin  -n default
+
+# añadiendo permiso de administrador al usuario
+
+oc get users
+oadm policy add-cluster-role-to-user cluster-admin admin
+
+# Levantando la 1r APP
+ #Simple HELLO-WORLD y Puerto 8080 curl in master
+
+
+
+oc login
+oc new-project test
+oc status
+oc new-app https://github.com/openshift/ruby-hello-world
+
+#oc env dc database --list | oc env dc ruby-hello-world -e -
+
+# Levantando APP con DB y Integracion.
+
+MYSQL_USER zz
+MYSQL_PASSWORD 1
+MYSQL_DATABASE sampledb
+MYSQL_HOST database
+
+START BUILD
+oc expose service ruby-hello-world
+
+# Seleccionando proyecto
+oc project ls
+oc project proyecto1
+
+
+# editando politicas restrictivas
+
+oc edit scc restricted
+oc describe scc restricted
+
+#Crear usuario - OMITIR
+oc create user test-user  --full-name="Test User"
+oc get users
+oc policy add-role-to-user admin test-user
+htpasswd /etc/origin/master/htpasswd test-user
+oadm policy add-cluster-role-to-user cluster-admin test-user
+
+# Asignar el usuario a un proyecto
+oc policy add-role-to-user admin test-user -n demo
+

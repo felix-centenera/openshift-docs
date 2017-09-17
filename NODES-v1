@@ -1,0 +1,43 @@
+NODES
+
+#########
+
+vi /etc/sysconfig/docker
+
+INSECURE_REGISTRY='--insecure-registry 172.30.107.247:5000'
+
+yum install -y nfs-utils
+
+setsebool -P virt_use_nfs 1
+systemctl enable rpcbind
+systemctl enable nfs-server
+systemctl restart rpcbind
+systemctl restart nfs-server
+
+# 
+showmount -e master01.itshellws.local
+cat /etc/exports
+setsebool -P virt_use_nfs 1
+setsebool -P virt_sandbox_use_nfs 1
+
+#########
+
+vi /etc/sysconfig/iptables
+
+-A INPUT -p udp -m state --state NEW -m multiport --dports 111,892,2049,32769,58271,20048,50800 -j ACCEPT
+-A INPUT -p tcp -m state --state NEW -m multiport --dports 111,892,2049,32803,44052,20048,35790 -j ACCEPT
+-A INPUT -p udp -m state --state NEW -m multiport --dports 111,892,2049,32769 -j ACCEPT
+-A INPUT -p tcp -m state --state NEW -m multiport --dports 111,892,2049,32803 -j ACCEPT
+
+systemctl restart iptables
+
+mkdir -p /mnt/RBD
+chmod 777 /mnt/RBD
+
+mount -t nfs 10.7.24.254:/mnt/RBD /mnt/RBD
+
+### PARA VER LOS PUERTOS Q UTILIZA RPC BAJAR EL FIREWALL PROBAR QUE CONECTE Y TIRAR EL COMANDO DE RPC INFO
+
+rpcinfo -p
+
+LUEGO AGREAGR LOS PUERTOS EN NUESTRO IPTABLES.
